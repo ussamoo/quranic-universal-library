@@ -2,12 +2,14 @@
 #
 # Table name: downloadable_resource_tags
 #
-#  id            :bigint           not null, primary key
-#  description   :text
-#  glossary_term :string
-#  name          :string
-#  created_at    :datetime         not null
-#  updated_at    :datetime         not null
+#  id              :bigint           not null, primary key
+#  color_class     :string           default("blue")
+#  description     :text
+#  glossary_term   :string
+#  name            :string
+#  resources_count :integer
+#  created_at      :datetime         not null
+#  updated_at      :datetime         not null
 #
 # Indexes
 #

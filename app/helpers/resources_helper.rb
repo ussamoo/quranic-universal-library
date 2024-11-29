@@ -163,7 +163,7 @@ module ResourcesHelper
         icon: 'layout.svg',
         url: '/resources/morphology',
         type: 'grammar-morphology',
-        count: WordCorpus.count
+        count: WordCorpus.count || 0
       ),
 
       mutashabihat: ToolCard.new(

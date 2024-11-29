@@ -7,14 +7,20 @@
 #  location        :string
 #  segment         :json
 #  transliteration :string
-#  corpus_id       :integer          not null, primary key
+#  created_at      :datetime         not null
+#  updated_at      :datetime         not null
+#  corpus_id       :bigint           not null, primary key
 #  word_id         :integer
 #
 # Indexes
 #
-#  index_quran.word_corpus_on_word_id  (word_id)
+#  index_word_corpus_on_word_id  (word_id)
 #
 
-class WordCorpus < QuranApiRecord
+class WordCorpus < ApplicationRecord
+  self.table_name = 'word_corpus'
+  
   belongs_to :word
+
+  validates :word_id, presence: true
 end

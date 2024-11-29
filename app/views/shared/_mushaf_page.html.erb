@@ -91,25 +91,27 @@
                       </div>
                     <% end %>
 
-                    <span class="char <%= word.css_class %> <%= 'bg-success' if params[:word] == word.word_id %> char-<%= word.char_type_name %> <%= 'word--missing' if word.word_id.nil? %>"
-                          id="word-<%= word.position_in_page %>"
-                          data-word-id="<%= word.word_id %>"
-                          data-location="<%= word.word.location %>"
-                          data-ayah="<%= word.word.verse_key %>"
-                          data-id="<%= word.id %>">
-                      <a href="<%= admin_mushaf_word_path(word.id) %>" target="_blank">
-                        <% if use_images %>
-                          <% if tajweed_rules %>
-                            <% tajweed_rules.positions.each do |part| %>
-                              <span class="part rl<%= part['rule'] %>" data-img-width="<%= part['imageWidth'] %>" style="width: <%= part['width'] %>px; height: <%= part['height'] %>px; margin-top: <%= part['top'] %>px; margin-left: <%= part['left'] %>px;" group="<%= part['group'] %>" rule="<%= part['rule'] %>" audio="<%= part['audio'] %>"></span>
-                            <% end %>
-                          <% end %>
-                          <img src="<%= word.image_url %>"/>
-                        <% else %>
-                          <%= word.text.html_safe %>
-                        <% end %>
-                      </a>
-                    </span>
+                    <% if word.present? && word.respond_to?(:text) %>
+                      <div
+                        id="word-<%= word.position_in_page %>"
+                        data-word-id="<%= word.word_id %>"
+                        data-location="<%= word.location %>"
+                        data-ayah="<%= word.verse_key %>"
+                        data-id="<%= word.id %>">
+                        <a href="<%= admin_mushaf_word_path(word.id) %>" target="_blank">
+                          <%= word.text %>
+                        </a>
+                      </div>
+                    <% else %>
+                      <div
+                        id="word-<%= word.position_in_page %>"
+                        data-word-id="<%= word.word_id %>"
+                        data-id="<%= word.id %>">
+                        <a href="<%= admin_mushaf_word_path(word.id) %>" target="_blank">
+                          [Missing Word]
+                        </a>
+                      </div>
+                    <% end %>
                   <% end %>
 
                   <% if group_tag_started %>

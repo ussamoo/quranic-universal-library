@@ -77,6 +77,9 @@ gem "sentry-ruby", '~> 5.19.0'
 gem 'sentry-rails', '~> 5.19'
 gem 'sentry-sidekiq', '~> 5.19'
 
+gem 'mutex_m'
+gem 'base64'  # Also add this as it's commonly needed
+
 group :development do
   # Gems we used for optimizing fonts. Might need them in future.
   # gem 'convert_font'

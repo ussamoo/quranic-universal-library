@@ -9,13 +9,15 @@ require 'sidekiq-scheduler/web'
 require 'sidekiq-status'
 require 'sidekiq-status/web'
 
-# Need delays for action mailer, active jobs syntax is weird
-Sidekiq::Extensions.enable_delay!
+# Remove deprecated delayed extensions
+# Instead, use ActiveJob with Sidekiq adapter
+Rails.application.config.active_job.queue_adapter = :sidekiq
 
 Sidekiq.logger.level = Logger::INFO
-Sidekiq.default_worker_options = { 'backtrace' => true }
 
+# Update to new configuration syntax
 Sidekiq.configure_server do |config|
+  config.default_job_options = { 'backtrace' => true }
   Sidekiq::Status.configure_server_middleware config
   Sidekiq::Status.configure_client_middleware config
 end

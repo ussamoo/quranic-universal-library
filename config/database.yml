@@ -16,7 +16,7 @@ quran_api_db:
 
 development:
   adapter: postgresql
-  database: quran_community_tarteel
+  database: quran_dev
 
 test:
   adapter: postgresql
