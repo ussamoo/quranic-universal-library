@@ -515,9 +515,9 @@ ActiveAdmin.register Word do
       word_fields << 'audio_url'
     end
 
-    ExportWordsJob.perform_later(
+    ExportWordsJob.perform_now(
       file_name: file_name,
-      admin_id: current_user.id,
+      user_id: current_user.id,
       mushaf_id: mushaf_id,
       language_id: language,
       word_fields: word_fields

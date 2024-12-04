@@ -91,7 +91,7 @@ ActiveAdmin.register Mushaf do
     file_name = params[:file_name].presence || 'quran-data.sqlite'
     mushaf_ids = params[:mushaf_ids].split(',').compact_blank
 
-    Export::MushafLayoutExportJob.perform_later(
+    Export::MushafLayoutExportJob.perform_now(
       file_name: file_name,
       user_id: current_user.id,
       mushaf_ids: mushaf_ids

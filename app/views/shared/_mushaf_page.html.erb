@@ -95,8 +95,8 @@
                       <div
                         id="word-<%= word.position_in_page %>"
                         data-word-id="<%= word.word_id %>"
-                        data-location="<%= word.location %>"
-                        data-ayah="<%= word.verse_key %>"
+                        data-location="<%= word.try(:location) %>"
+                        data-ayah="<%= word.try(:verse_key) %>"
                         data-id="<%= word.id %>">
                         <a href="<%= admin_mushaf_word_path(word.id) %>" target="_blank">
                           <%= word.text %>

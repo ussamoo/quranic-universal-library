@@ -1,5 +1,6 @@
 module Export
   class MushafLayoutExportJob < ApplicationJob
+    queue_as :default
     STORAGE_PATH = "#{Rails.root}/tmp/exported_mushaf_layouts"
 
     def perform(file_name:,  user_id:, mushaf_ids: [])
@@ -55,10 +56,14 @@ Best regards,
     def load_mushafs(mushaf_ids)
       if mushaf_ids == ['tarteel-mushafs']
         tag = Tag.where(name: 'Tarteel mushafs').first
-        resources = ResourceContent
-                      .joins(:resource_tags)
-                      .where(resource_tags: { tag_id: tag.id })
-        Mushaf.where(resource_content_id: resources.pluck(:id))
+        if tag.present?
+          resources = ResourceContent
+                        .joins(:resource_tags)
+                        .where(resource_tags: { tag_id: tag.id })
+          Mushaf.where(resource_content_id: resources.pluck(:id))
+        else
+          Mushaf.where(id: mushaf_ids.map(&:to_i))
+        end
       else
         Mushaf.where(id: mushaf_ids.map(&:to_i))
       end

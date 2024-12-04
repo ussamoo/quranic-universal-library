@@ -36,6 +36,8 @@ class ExportMushafLayout
     i = 0
 
     Word.unscoped.order('word_index ASC').find_each do |word|
+      line_number = word.line_number
+      page_number = word.page_number
       surah, ayah, word_number = word.location.split(':').map(&:to_i)
       text_uthmani = word.text_uthmani
       text_indopak = word.text_qpc_nastaleeq_hafs
@@ -46,7 +48,7 @@ class ExportMushafLayout
       text_qpc_hafs = word.text_qpc_hafs
       is_ayah_marker = word.ayah_mark?
 
-      words.push("(#{surah}, #{ayah}, #{word_number}, #{word.word_index}, '#{text_uthmani}', '#{text_indopak}', '#{indopak_hanafi}', '#{code_v1}', '#{text_digital_khatt_v2}', '#{text_digital_khatt_v1}', '#{text_qpc_hafs}', #{is_ayah_marker})")
+      words.push("(#{page_number}, #{line_number}, #{surah}, #{ayah}, #{word_number}, #{word.word_index}, '#{text_uthmani}', '#{text_indopak}', '#{indopak_hanafi}', '#{code_v1}', '#{text_digital_khatt_v2}', '#{text_digital_khatt_v1}', '#{text_qpc_hafs}', #{is_ayah_marker})")
       i += 1
 
       if i >= page_size
@@ -154,38 +156,41 @@ class ExportMushafLayout
             line_number: line
           ).first
 
-          line_type = if alignment
-                        if alignment.is_surah_name?
+          if alignment.present?
+            line_type = if alignment.is_surah_name?
                           'surah_name'
                         elsif alignment.is_bismillah?
                           'basmallah'
                         else
                           'ayah'
                         end
-                      else
-                        'ayah'
-                      end
 
-          range_start = range_end = nil
-          if line_type == 'ayah' && lines[line].present?
-            words = lines[line].sort_by { |word| word.word_index }
+            range_start = range_end = nil
+            if line_type == 'ayah' && lines[line].present?
+              Rails.logger.debug "Lines: #{lines[line].inspect}"
+              words = lines[line].compact.sort_by { |word| word.word_index }
 
-            range_start = words.first.word_index
-            range_end = words.last.word_index
-          elsif line_type == 'surah_name'
-            range_start = alignment.get_surah_number
+              if words.any?
+                range_start = words.first.word_index
+                range_end = words.last.word_index
+              end
+            elsif line_type == 'surah_name'
+              range_start = alignment.get_surah_number
+            end
+
+            is_centered = alignment&.is_center_aligned? || line_type == 'surah_name' || line_type == 'basmallah'
+
+            layout_records << [
+              page.page_number,
+              index + 1,
+              line_type,
+              is_centered,
+              range_start,
+              range_end
+            ]
+          else
+            Rails.logger.warn "Alignment is nil for line #{line}"
           end
-
-          is_centered = alignment&.is_center_aligned? || line_type == 'surah_name' || line_type == 'basmallah'
-
-          layout_records << [
-            page.page_number,
-            index + 1,
-            line_type,
-            is_centered,
-            range_start,
-            range_end
-          ]
 
           if layout_records.size >= batch_size
             bulk_insert_layouts(layout_records)
@@ -254,7 +259,7 @@ class ExportMushafLayout
         database: db
       })
 
-    ExportedWord.connection.execute "CREATE TABLE words(surah_number integer, ayah_number integer, word_number integer, word_number_all integer, uthmani string, nastaleeq string, indopak string, qpc_v1 string, dk_v2 string, dk_v1 string, qpc_hafs string, is_ayah_marker boolean)"
+    ExportedWord.connection.execute "CREATE TABLE words(page_number integer,line_number integer, surah_number integer, ayah_number integer, word_number integer, word_number_all integer, uthmani string, nastaleeq string, indopak string, qpc_v1 string, dk_v2 string, dk_v1 string, qpc_hafs string, is_ayah_marker boolean)"
     layout_created = {}
 
     mushafs.each do |mushaf|
@@ -281,6 +286,8 @@ class ExportMushafLayout
     # nastaleeq is indopak script printed in Madaniah and compatible with QPC font
     ExportedWord.connection.execute <<-SQL
   INSERT INTO words (
+  page_number,
+  line_number,
     surah_number,
     ayah_number,
     word_number,
